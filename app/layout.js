@@ -1,6 +1,14 @@
-import Link from 'next/link';
 import './globals.css';  // Optional for global styling
-import Fonts from './fonts/fonts';
+import Icons from './fonts/icons';
+import { Roboto } from 'next/font/google';
+import Navigation from './components/nav';
+
+// Configure Roboto font
+const roboto = Roboto({
+    subsets: ['latin'],
+    weight: ['400', '700'],
+    display: 'swap',
+});
 
 export const metadata = {
     title: 'StreamList App',
@@ -9,20 +17,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
+        <html lang="en" classname={roboto.classname}>
         <head />
             <body>
-            <Fonts />
-                <nav>
-                    <ul>
-                        <li><Link href="/">StreamList</Link></li>
-                        <li><Link href="/movies">Movies</Link></li>
-                        <li><Link href="/cart">Cart</Link></li>
-                        <li><Link href="/about">About</Link></li>
-                    </ul>
-                </nav>
-                <main>{children}</main>
+                <div class="content"><Icons />
+                        <Navigation />
+                        <main>{children}</main>
+                </div>
+                <footer class="footer">
+                    <a href="https://github.com/Craig-A-Velez/streamlist"><span>Craig Velez - 2024</span></a>
+                </footer>
             </body>
+            
         </html>
     );
 }
