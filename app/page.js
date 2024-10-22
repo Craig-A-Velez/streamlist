@@ -1,6 +1,6 @@
-'use client'; // directive to initiate client side component
+'use client'; // directive to initiate client-side component
 
-import { useState } from 'react'; // hook for form value management
+import { useState, useEffect } from 'react'; // hooks for form value management
 
 export default function StreamList() {
     const [inputValue, setInputValue] = useState('');
@@ -8,15 +8,31 @@ export default function StreamList() {
     const [editingIndex, setEditingIndex] = useState(null); // Track which item is being edited
     const [editValue, setEditValue] = useState(''); // Store new value for the item being edited
 
+    // Load items from localStorage when the component mounts
+    useEffect(() => {
+        const savedItems = localStorage.getItem('streamlist-items');
+        if (savedItems) {
+            setItems(JSON.parse(savedItems)); // Restore items from localStorage if they exist
+        }
+    }, []); // Only run on initial mount
+
+    // Save items to localStorage whenever the `items` array changes
+    useEffect(() => {
+        if (items.length > 0) { // Only save if there's something in items
+            localStorage.setItem('streamlist-items', JSON.stringify(items));
+        }
+    }, [items]); // Dependency array includes 'items' so it runs when items change
+
+    // Handle form submission for adding new items
     const handleSubmit = (e) => {
         e.preventDefault();
         if (inputValue.trim() !== '') {
-            setItems([...items, {text: inputValue, completed: false } ]); // Append new value to items list
-            setInputValue('');
+            setItems([...items, { text: inputValue, completed: false } ]); // Append new value to items list
+            setInputValue(''); // Clear input after submission
         }
     };
 
-    // function for list item deletion
+    // Function for list item deletion
     const handleDelete = (index) => {
         const updatedItems = items.filter((_, i) => i !== index); // remove selected item from list
         setItems(updatedItems);
@@ -63,7 +79,7 @@ export default function StreamList() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                     />
-                    <button type="submit"><span class="material-symbols-outlined">add</span></button>
+                    <button type="submit"><span className="material-symbols-outlined">add</span></button>
                 </form>
             </div>
             
@@ -110,7 +126,7 @@ export default function StreamList() {
                                         aria-label="Edit item"
                                         className="edit-button"
                                     >
-                                        <span class="material-symbols-outlined icon-edit">
+                                        <span className="material-symbols-outlined icon-edit">
                                             edit
                                         </span>
                                     </button>
@@ -119,7 +135,7 @@ export default function StreamList() {
                                         onClick={() => handleComplete(index)}
                                         aria-label="Complete item"
                                         className="complete-button">
-                                        <span class="material-symbols-outlined icon-complete">
+                                        <span className="material-symbols-outlined icon-complete">
                                             check
                                         </span>
                                     </button>
