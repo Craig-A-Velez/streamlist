@@ -203,10 +203,18 @@ export default function Cart() {
                     {selectedMovies.map((movie, index) => (
                         <li key={index}>{movie} - ${movieTitles.find(m => m.title === movie).rentalPrice.toFixed(2)}</li>
                     ))}
+                    </ul>
+                    <p>
+                        <b>Total Items in Cart: { 
+                            (selectedStreamingPlan ? 1 : 0) + 
+                            (selectedStreamListPlan ? 1 : 0) + 
+                            selectedMovies.length 
+                        }</b>
+                    </p>
                     <p><b>Subtotal: ${((totalPrice / (1 + salesTaxRate))).toFixed(2)}</b></p>
                     <p><b>Sales Tax (7.25%): ${salesTax.toFixed(2)}</b></p>
                     <p><b>Total Price: ${totalPrice.toFixed(2)}</b></p>
-                </ul>
+                
             </div>
 
             {/* Payment Details */}
