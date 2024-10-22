@@ -207,9 +207,11 @@ main {
 
 /* Payment Details */
 #cart {
+    padding: 20px 0;
     display: flex;
     flex-flow: column wrap;
-    max-height: 700px;
+    max-height: 900px;
+    max-width: 100%;
 }
 
 #cart .section {
@@ -217,7 +219,8 @@ main {
     flex-basis: auto;
     margin-bottom: 1em;
     max-width: 50%;
-    padding: 0 10px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 #cart .section ul{
@@ -225,7 +228,7 @@ main {
 }
 
 .payment-details input {
-    width: 90%;
+    width: 100%;
     box-sizing: border-box;
     padding: 10px;
     margin-right: 10px;
@@ -248,20 +251,21 @@ main {
     border-radius: 4px;
     cursor: pointer;
     float: inline-end;
-    margin-right: 10%;
 }
 
-@media (max-width: 768px) {
+
+
+@media (max-width: 1060px) {
     #cart {
         display: block;
         flex-flow: column wrap;
         max-height: none;
     }
 
-        #cart .section {
-            flex-basis: unset;
-            max-width: none;
-        }
+    #cart .section {
+        flex-basis: unset;
+        max-width: none;
+    }
 
     .payment-details input {
         width: 100%;

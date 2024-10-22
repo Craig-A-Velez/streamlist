@@ -16,17 +16,17 @@ export default function Cart() {
 
     // Streaming plans with price info
     const streamingPlans = [
-        { name: 'Individual Plan', price: 9.99 },
-        { name: 'Friendly Plan', price: 14.99 },
-        { name: 'Family Plan', price: 19.99 },
+        { name: 'Individual Plan', detail:'Stream one movie to a single device at a time. This is the most common plan.', price: 9.99 },
+        { name: 'Friendly Plan', detail:'Stream movies to up to two devices simultaneously in high definition (HD) if available.', price: 14.99 },
+        { name: 'Family Plan', detail: 'Stream movies to up to four devices simultaneously in ultra-high definition (UHD) if available.', price: 19.99 },
     ];
 
     // StreamList plans with price info
     const streamListPlans = [
-        { name: 'Basic Subscription', price: 4.99 },
-        { name: 'Gold Subscription', price: 9.99 },
-        { name: 'Premium Subscription', price: 14.99 },
-        { name: 'Social Media Sharing Subscription', price: 19.99 },
+        { name: 'Basic Subscription', detail: 'Maintain a single personal Watch List.', price: 4.99 },
+        { name: 'Gold Subscription', detail: 'Maintain 1 to 5 personal Watch Lists.', price: 9.99 },
+        { name: 'Premium Subscription', detail: 'Features multiple lists with built-in sharing capabilities among family members.', price: 14.99 },
+        { name: 'Social Media Sharing Subscription', detail: 'Merges premium access so you can share your movie lists on social media platforms, allowing other users to comment on and react to your lists.', price: 19.99 },
     ];
 
     // California sales tax rate
@@ -88,7 +88,8 @@ export default function Cart() {
                                     checked={selectedStreamingPlan?.name === plan.name}
                                     onChange={() => handleStreamingPlanSelect(plan)}
                                 />
-                                {plan.name} - ${plan.price.toFixed(2)}
+                                {plan.name}: {plan.detail} - ${plan.price.toFixed(2)}
+                                
                             </label>
                         </li>
                     ))}
@@ -108,7 +109,8 @@ export default function Cart() {
                                     checked={selectedStreamListPlan?.name === plan.name}
                                     onChange={() => handleStreamListPlanSelect(plan)}
                                 />
-                                {plan.name} - ${plan.price.toFixed(2)}
+                                {plan.name}: {plan.detail} - ${plan.price.toFixed(2)}
+                                
                             </label>
                         </li>
                     ))}
