@@ -161,6 +161,8 @@ main {
 
 /* Watchlist styling */
 
+#watchlist .complete-button,
+#watchlist .edit-button,
 #watchlist .delete-button {
     color: slategray;
     transition: color 0.3s ease-in-out;
@@ -171,13 +173,20 @@ main {
     float: right;
 }
 
+#watchlist .complete-button:hover,
+#watchlist .edit-button:hover,
 #watchlist .delete-button:hover {
     color: rgb(225, 73, 38);
 }
 
-#watchlist .delete-button .icon-delete {
+#watchlist .icon-delete,
+#watchlist .icon-edit,
+#watchlist .icon-complete {
     vertical-align: bottom;
+    text-decoration: none !important;
 }
+
+
 
 #watchlist ul li {
     border-bottom: 1px solid #c3c5cc;
@@ -188,4 +197,77 @@ main {
 #watchlist ul li::marker {
     font-family: 'Material Symbols Outlined';
     content: "slideshow"
+}
+
+#watchlist .list-item.completed span:nth-of-type(1) {
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    text-decoration-color: rgb(225, 73, 38);
+}
+
+/* Payment Details */
+#cart {
+    display: flex;
+    flex-flow: column wrap;
+    max-height: 700px;
+}
+
+#cart .section {
+    display: inline-block;
+    flex-basis: auto;
+    margin-bottom: 1em;
+    max-width: 50%;
+    padding: 0 10px;
+}
+
+#cart .section ul{
+    list-style-type:none;
+}
+
+.payment-details input {
+    width: 90%;
+    box-sizing: border-box;
+    padding: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    flex: 1;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#cart form button {
+    vertical-align: top;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: none;
+    background-color: rgb(225, 73, 38);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    float: inline-end;
+    margin-right: 10%;
+}
+
+@media (max-width: 768px) {
+    #cart {
+        display: block;
+        flex-flow: column wrap;
+        max-height: none;
+    }
+
+        #cart .section {
+            flex-basis: unset;
+            max-width: none;
+        }
+
+    .payment-details input {
+        width: 100%;
+    }
+
+    #cart form button {
+        margin-right: 0;
+    }
 }
