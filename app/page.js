@@ -34,9 +34,12 @@ export default function StreamList() {
 
     // Function for list item deletion
     const handleDelete = (index) => {
-        const updatedItems = items.filter((_, i) => i !== index); // remove selected item from list
-        setItems(updatedItems);
-    }
+        const updatedItems = items.filter((_, i) => i !== index); // Remove selected item from list
+        setItems(updatedItems); // Update the state
+
+        // Update local storage after deleting the item
+        localStorage.setItem('streamlist-items', JSON.stringify(updatedItems));
+    };
 
     // Enable editing mode for a specific item
     const handleEdit = (index) => {

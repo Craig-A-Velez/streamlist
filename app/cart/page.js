@@ -3,9 +3,27 @@
 import { useState, useEffect } from 'react';
 
 export default function Cart() {
-    const [selectedStreamingPlan, setSelectedStreamingPlan] = useState(null);
-    const [selectedStreamListPlan, setSelectedStreamListPlan] = useState(null);
-    const [selectedMovies, setSelectedMovies] = useState([]); // Array to hold selected movie titles
+    // Initialize variables with accounting for local storage
+    const [selectedStreamingPlan, setSelectedStreamingPlan] = useState(() => {
+        const storedStreamingPlan = localStorage.getItem('selectedStreamingPlan');
+        return storedStreamingPlan ? JSON.parse(storedStreamingPlan) : null;
+    });
+
+    const [selectedStreamListPlan, setSelectedStreamListPlan] = useState(() => {
+        const storedStreamListPlan = localStorage.getItem('selectedStreamListPlan');
+        return storedStreamListPlan ? JSON.parse(storedStreamListPlan) : null;
+    });
+
+    const [selectedMovies, setSelectedMovies] = useState(() => {
+        const storedMovies = localStorage.getItem('selectedMovies');
+        return storedMovies ? JSON.parse(storedMovies) : [];
+    });
+
+    const [favoriteMovies, setFavoriteMovies] = useState(() => {
+        const storedFavoriteMovies = localStorage.getItem('favoriteMovies');
+        return storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : [];
+    });
+
     const [totalPrice, setTotalPrice] = useState(0);
     const [salesTax, setSalesTax] = useState(0);
     const [paymentInfo, setPaymentInfo] = useState({
@@ -17,6 +35,7 @@ export default function Cart() {
 
     // Streaming plans with price info
     const streamingPlans = [
+        { name: 'No Plan', detail: 'Remove Selected Plan.', price: 0.00 },
         { name: 'Individual Plan', detail: 'Stream one movie to a single device at a time. This is the most common plan.', price: 9.99 },
         { name: 'Friendly Plan', detail: 'Stream movies to up to two devices simultaneously in high definition (HD) if available.', price: 14.99 },
         { name: 'Family Plan', detail: 'Stream movies to up to four devices simultaneously in ultra-high definition (UHD) if available.', price: 19.99 },
@@ -24,47 +43,36 @@ export default function Cart() {
 
     // StreamList plans with price info
     const streamListPlans = [
+        { name: 'No Subscription', detail: 'Remove Selected Plan.', price: 0.00 },
         { name: 'Basic Subscription', detail: 'Maintain a single personal Watch List.', price: 4.99 },
         { name: 'Gold Subscription', detail: 'Maintain 1 to 5 personal Watch Lists.', price: 9.99 },
         { name: 'Premium Subscription', detail: 'Features multiple lists with built-in sharing capabilities among family members.', price: 14.99 },
         { name: 'Social Media Sharing Subscription', detail: 'Merges premium access so you can share your movie lists on social media platforms, allowing other users to comment on and react to your lists.', price: 19.99 },
     ];
 
-    // Movie titles and rental prices
-    const movieTitles = [
-        { title: 'Inception', rentalPrice: 3.99 },
-        { title: 'The Dark Knight', rentalPrice: 4.99 },
-        { title: 'Interstellar', rentalPrice: 3.99 },
-        { title: 'The Matrix', rentalPrice: 2.99 },
-        { title: 'Fight Club', rentalPrice: 3.49 },
-    ];
-
     // California sales tax rate
     const salesTaxRate = 0.0725;
-
-    // Load selections from local storage
-    useEffect(() => {
-        const storedStreamingPlan = JSON.parse(localStorage.getItem('selectedStreamingPlan'));
-        const storedStreamListPlan = JSON.parse(localStorage.getItem('selectedStreamListPlan'));
-        const storedMovies = JSON.parse(localStorage.getItem('selectedMovies')) || [];
-
-        if (storedStreamingPlan) setSelectedStreamingPlan(storedStreamingPlan);
-        if (storedStreamListPlan) setSelectedStreamListPlan(storedStreamListPlan);
-        setSelectedMovies(storedMovies); // Make sure this works
-    }, []);
 
     // Save selections to local storage whenever they change
     useEffect(() => {
         localStorage.setItem('selectedStreamingPlan', JSON.stringify(selectedStreamingPlan));
+        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+    }, [selectedStreamingPlan]);
+
+    useEffect(() => {
         localStorage.setItem('selectedStreamListPlan', JSON.stringify(selectedStreamListPlan));
-        localStorage.setItem('selectedMovies', JSON.stringify(selectedMovies)); // Ensure this updates correctly
-    }, [selectedStreamingPlan, selectedStreamListPlan, selectedMovies]);
+        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+    }, [selectedStreamListPlan]);
+
+    useEffect(() => {
+        localStorage.setItem('selectedMovies', JSON.stringify(selectedMovies));
+        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+    }, [selectedMovies]);
 
     // Handle selecting/deselecting a streaming plan
     const handleStreamingPlanSelect = (plan) => {
-        // Toggle the selected plan if it's already selected, or set a new one
-        if (selectedStreamingPlan?.name === plan.name) {
-            setSelectedStreamingPlan(null); // Deselect
+        if (plan.name === 'No Plan') {
+            setSelectedStreamingPlan(null); // Deselect and remove from local storage
         } else {
             setSelectedStreamingPlan(plan); // Select new plan
         }
@@ -72,9 +80,8 @@ export default function Cart() {
 
     // Handle selecting/deselecting a StreamList plan
     const handleStreamListPlanSelect = (plan) => {
-        // Toggle the selected plan if it's already selected, or set a new one
-        if (selectedStreamListPlan?.name === plan.name) {
-            setSelectedStreamListPlan(null); // Deselect
+        if (plan.name === 'No Subscription') {
+            setSelectedStreamListPlan(null); // Deselect and remove from local storage
         } else {
             setSelectedStreamListPlan(plan); // Select new plan
         }
@@ -84,11 +91,17 @@ export default function Cart() {
     const handleMovieSelect = (title) => {
         setSelectedMovies((prevSelected) => {
             if (prevSelected.includes(title)) {
-                return prevSelected.filter((t) => t !== title); // Deselect the movie if already selected
+                return prevSelected.filter((t) => t !== title); // Deselect the movie
             } else {
                 return [...prevSelected, title]; // Select the new movie
             }
         });
+
+        // Update local storage
+        localStorage.setItem('selectedMovies', JSON.stringify([...selectedMovies, title]));
+
+        // Dispatch a custom event to update the Navigation item count
+        window.dispatchEvent(new Event('cartUpdated'));
     };
 
     // Update total price including sales tax
@@ -96,8 +109,8 @@ export default function Cart() {
         const streamingPrice = selectedStreamingPlan ? selectedStreamingPlan.price : 0;
         const streamListPrice = selectedStreamListPlan ? selectedStreamListPlan.price : 0;
         const moviePrice = selectedMovies.reduce((total, movie) => {
-            const movieData = movieTitles.find((m) => m.title === movie);
-            return total + (movieData ? movieData.rentalPrice : 0);
+            const movieData = favoriteMovies.find((m) => m.title === movie);
+            return total + (movieData ? 3.99 : 0); // Assume rental price is 3.99 if not provided
         }, 0);
         const subtotal = streamingPrice + streamListPrice + moviePrice;
         const tax = subtotal * salesTaxRate;
@@ -174,19 +187,23 @@ export default function Cart() {
             {/* Available Movies */}
             <div className="section">
                 <h2>Available Movie Titles</h2>
-                <ul>
-                    {movieTitles.map((movie, index) => (
-                        <li key={index}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={selectedMovies.includes(movie.title)}
-                                    onChange={() => handleMovieSelect(movie.title)}
-                                />
-                                {movie.title} - ${movie.rentalPrice.toFixed(2)}
-                            </label>
-                        </li>
-                    ))}
+                <ul className="movie-titles">
+                    {favoriteMovies.length > 0 ? (
+                        favoriteMovies.map((movie, index) => (
+                            <li key={index}>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedMovies.includes(movie.title)}
+                                        onChange={() => handleMovieSelect(movie.title)}
+                                    />
+                                    {movie.title} - $3.99
+                                </label>
+                            </li>
+                        ))
+                    ) : (
+                        <p>No favorite movies found in local storage.</p>
+                    )}
                 </ul>
             </div>
 
@@ -194,66 +211,79 @@ export default function Cart() {
             <div className="section">
                 <h2>Your Cart</h2>
                 <ul>
-                    {selectedStreamingPlan && (
+                    {selectedStreamingPlan ? (
                         <li>{selectedStreamingPlan.name} - ${selectedStreamingPlan.price.toFixed(2)}</li>
+                    ) : (
+                        <li>No Streaming Experience Plan Selected</li>
                     )}
-                    {selectedStreamListPlan && (
+                    {selectedStreamListPlan ? (
                         <li>{selectedStreamListPlan.name} - ${selectedStreamListPlan.price.toFixed(2)}</li>
+                    ) : (
+                        <li>No StreamList Experience Plan Selected</li>
                     )}
-                    {selectedMovies.map((movie, index) => (
-                        <li key={index}>{movie} - ${movieTitles.find(m => m.title === movie).rentalPrice.toFixed(2)}</li>
-                    ))}
-                    </ul>
-                    <p>
-                        <b>Total Items in Cart: { 
-                            (selectedStreamingPlan ? 1 : 0) + 
-                            (selectedStreamListPlan ? 1 : 0) + 
-                            selectedMovies.length 
-                        }</b>
-                    </p>
-                    <p><b>Subtotal: ${((totalPrice / (1 + salesTaxRate))).toFixed(2)}</b></p>
-                    <p><b>Sales Tax (7.25%): ${salesTax.toFixed(2)}</b></p>
-                    <p><b>Total Price: ${totalPrice.toFixed(2)}</b></p>
-                
+                    {selectedMovies.length > 0 ? (
+                        selectedMovies.map((movie, index) => (
+                            <li key={index}>{movie} - $3.99</li> // Assuming fixed price for now
+                        ))
+                    ) : (
+                        <li>No Movies Selected</li>
+                    )}
+                </ul>
+                <p>
+                    <b>Total Items in Cart: {
+                        (selectedStreamingPlan ? 1 : 0) +
+                        (selectedStreamListPlan ? 1 : 0) +
+                        selectedMovies.length
+                    }</b>
+                </p>
+                <p>
+                    <b>Subtotal: ${totalPrice.toFixed(2)}</b> <br />
+                    <b>Sales Tax: ${salesTax.toFixed(2)}</b>
+                </p>
             </div>
 
-            {/* Payment Details */}
+
+            {/* Payment Form */}
             <div className="section payment-details">
-                <h2>Payment Details</h2>
+                <h2>Payment</h2>
                 <form onSubmit={handlePaymentSubmit}>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Name on Card"
-                        value={paymentInfo.name}
-                        onChange={handlePaymentChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="cardNumber"
-                        placeholder="Card Number"
-                        value={paymentInfo.cardNumber}
-                        onChange={handlePaymentChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="expiration"
-                        placeholder="Expiration Date (MM/YY)"
-                        value={paymentInfo.expiration}
-                        onChange={handlePaymentChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="cvv"
-                        placeholder="CVV"
-                        value={paymentInfo.cvv}
-                        onChange={handlePaymentChange}
-                        required
-                    />
-                    <button type="submit">Complete Order</button>
+                    <label>
+                        Name:
+                        <input
+                            type="text"
+                            name="name"
+                            value={paymentInfo.name}
+                            onChange={handlePaymentChange}
+                        />
+                    </label>
+                    <label>
+                        Card Number:
+                        <input
+                            type="text"
+                            name="cardNumber"
+                            value={paymentInfo.cardNumber}
+                            onChange={handlePaymentChange}
+                        />
+                    </label>
+                    <label>
+                        Expiration:
+                        <input
+                            type="text"
+                            name="expiration"
+                            value={paymentInfo.expiration}
+                            onChange={handlePaymentChange}
+                        />
+                    </label>
+                    <label>
+                        CVV:
+                        <input
+                            type="text"
+                            name="cvv"
+                            value={paymentInfo.cvv}
+                            onChange={handlePaymentChange}
+                        />
+                    </label>
+                    <button type="submit">Submit Payment</button>
                 </form>
             </div>
         </div>
