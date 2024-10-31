@@ -1,3 +1,8 @@
+export const metadata = {
+    title: 'About - StreamList',
+    description: 'Learn more about the StreamList app',
+};
+
 export default function About() {
     return (
         <div id="container">

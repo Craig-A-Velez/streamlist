@@ -1,0 +1,21 @@
+{
+  "short_name": "StreamList",
+  "name": "StreamList - Movie Streaming and List Management",
+  "description": "Create and manage streaming lists for movies and programs you want to watch.",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FFFFFF",
+  "background_color": "#013e75"
+}

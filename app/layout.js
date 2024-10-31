@@ -1,5 +1,8 @@
+"use client"; // Ensure this is a Client Component
+
 import './globals.css';  // Optional for global styling
 import Icons from './fonts/icons';
+import { useEffect } from 'react';
 import { Roboto } from 'next/font/google';
 import Navigation from './components/nav';
 
@@ -10,21 +13,30 @@ const roboto = Roboto({
     display: 'swap',
 });
 
-export const metadata = {
-    title: 'StreamList App',
-    description: 'Create and manage your streaming list!',
-};
 
-export default function RootLayout({ children }) {
+
+export default function Layout({ children }) {
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(
+                (registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                },
+                (error) => {
+                    console.error('Service Worker registration failed:', error);
+                }
+            );
+        }
+    }, []);
+
     return (
-        <html lang="en" classname={roboto.classname}>
-        <head />
+        <html lang="en" className={roboto.classname}>
             <body>
-                <div class="content"><Icons />
+                <div className="content"><Icons />
                         <Navigation />
                         <main>{children}</main>
                 </div>
-                <footer class="footer">
+                <footer className="footer">
                     <a href="https://github.com/Craig-A-Velez/streamlist"><span>Craig Velez - 2024</span></a>
                 </footer>
             </body>

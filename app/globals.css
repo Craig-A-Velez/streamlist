@@ -216,9 +216,10 @@ main {
 }
 
 /* Cart Page Movie Titles */
-
-ul.movie-titles {
-    columns: 2;
+@media (min-width: 1060px) {
+    ul.movie-titles {
+        columns: 2;
+    }
 }
 /* Payment Details */
 #cart {
@@ -228,18 +229,18 @@ ul.movie-titles {
     max-width: 100%;
 }
 
-#cart .section {
-    display: inline-block;
-    flex-basis: auto;
-    margin-bottom: 1em;
-    width: 50%;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
+    #cart .section {
+        display: inline-block;
+        flex-basis: auto;
+        margin-bottom: 1em;
+        width: 50%;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
 
-#cart .section ul{
-    list-style-type:none;
-}
+        #cart .section ul {
+            list-style-type: none;
+        }
 
 .payment-details input {
     width: 100%;
@@ -276,11 +277,11 @@ ul.movie-titles {
         max-height: none;
     }
 
-    #cart .section {
-        flex-basis: unset;
-        max-width: none;
-        width: 100%;
-    }
+        #cart .section {
+            flex-basis: unset;
+            max-width: none;
+            width: 100%;
+        }
 
     .payment-details input {
         width: 100%;
@@ -309,11 +310,11 @@ ul.movie-titles {
     border-radius: 5px;
 }
 
-.movie-card .poster {
-    width: 100%;
-    height: 500px;
-    background-size: cover;
-}
+    .movie-card .poster {
+        width: 100%;
+        height: 500px;
+        background-size: cover;
+    }
 
 .info-card {
     padding: 0 10px;

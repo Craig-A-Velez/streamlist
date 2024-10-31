@@ -3,27 +3,10 @@
 import { useState, useEffect } from 'react';
 
 export default function Cart() {
-    // Initialize variables with accounting for local storage
-    const [selectedStreamingPlan, setSelectedStreamingPlan] = useState(() => {
-        const storedStreamingPlan = localStorage.getItem('selectedStreamingPlan');
-        return storedStreamingPlan ? JSON.parse(storedStreamingPlan) : null;
-    });
-
-    const [selectedStreamListPlan, setSelectedStreamListPlan] = useState(() => {
-        const storedStreamListPlan = localStorage.getItem('selectedStreamListPlan');
-        return storedStreamListPlan ? JSON.parse(storedStreamListPlan) : null;
-    });
-
-    const [selectedMovies, setSelectedMovies] = useState(() => {
-        const storedMovies = localStorage.getItem('selectedMovies');
-        return storedMovies ? JSON.parse(storedMovies) : [];
-    });
-
-    const [favoriteMovies, setFavoriteMovies] = useState(() => {
-        const storedFavoriteMovies = localStorage.getItem('favoriteMovies');
-        return storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : [];
-    });
-
+    const [selectedStreamingPlan, setSelectedStreamingPlan] = useState(null);
+    const [selectedStreamListPlan, setSelectedStreamListPlan] = useState(null);
+    const [selectedMovies, setSelectedMovies] = useState([]);
+    const [favoriteMovies, setFavoriteMovies] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [salesTax, setSalesTax] = useState(0);
     const [paymentInfo, setPaymentInfo] = useState({
@@ -50,67 +33,67 @@ export default function Cart() {
         { name: 'Social Media Sharing Subscription', detail: 'Merges premium access so you can share your movie lists on social media platforms, allowing other users to comment on and react to your lists.', price: 19.99 },
     ];
 
-    // California sales tax rate
     const salesTaxRate = 0.0725;
 
-    // Save selections to local storage whenever they change
+    // Load data from localStorage only on the client side
     useEffect(() => {
-        localStorage.setItem('selectedStreamingPlan', JSON.stringify(selectedStreamingPlan));
-        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+        if (typeof window !== "undefined") {
+            const storedStreamingPlan = localStorage.getItem('selectedStreamingPlan');
+            const storedStreamListPlan = localStorage.getItem('selectedStreamListPlan');
+            const storedMovies = localStorage.getItem('selectedMovies');
+            const storedFavoriteMovies = localStorage.getItem('favoriteMovies');
+
+            setSelectedStreamingPlan(storedStreamingPlan ? JSON.parse(storedStreamingPlan) : null);
+            setSelectedStreamListPlan(storedStreamListPlan ? JSON.parse(storedStreamListPlan) : null);
+            setSelectedMovies(storedMovies ? JSON.parse(storedMovies) : []);
+            setFavoriteMovies(storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : []);
+        }
+    }, []);
+
+    // Save selections to localStorage whenever they change
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            localStorage.setItem('selectedStreamingPlan', JSON.stringify(selectedStreamingPlan));
+            window.dispatchEvent(new Event('cartUpdated'));
+        }
     }, [selectedStreamingPlan]);
 
     useEffect(() => {
-        localStorage.setItem('selectedStreamListPlan', JSON.stringify(selectedStreamListPlan));
-        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+        if (typeof window !== "undefined") {
+            localStorage.setItem('selectedStreamListPlan', JSON.stringify(selectedStreamListPlan));
+            window.dispatchEvent(new Event('cartUpdated'));
+        }
     }, [selectedStreamListPlan]);
 
     useEffect(() => {
-        localStorage.setItem('selectedMovies', JSON.stringify(selectedMovies));
-        window.dispatchEvent(new Event('cartUpdated')); // Emit the event to update the count in Navigation
+        if (typeof window !== "undefined") {
+            localStorage.setItem('selectedMovies', JSON.stringify(selectedMovies));
+            window.dispatchEvent(new Event('cartUpdated'));
+        }
     }, [selectedMovies]);
 
-    // Handle selecting/deselecting a streaming plan
     const handleStreamingPlanSelect = (plan) => {
-        if (plan.name === 'No Plan') {
-            setSelectedStreamingPlan(null); // Deselect and remove from local storage
-        } else {
-            setSelectedStreamingPlan(plan); // Select new plan
-        }
+        setSelectedStreamingPlan(plan.name === 'No Plan' ? null : plan);
     };
 
-    // Handle selecting/deselecting a StreamList plan
     const handleStreamListPlanSelect = (plan) => {
-        if (plan.name === 'No Subscription') {
-            setSelectedStreamListPlan(null); // Deselect and remove from local storage
-        } else {
-            setSelectedStreamListPlan(plan); // Select new plan
-        }
+        setSelectedStreamListPlan(plan.name === 'No Subscription' ? null : plan);
     };
 
-    // Handle selecting/deselecting a movie title
     const handleMovieSelect = (title) => {
-        setSelectedMovies((prevSelected) => {
-            if (prevSelected.includes(title)) {
-                return prevSelected.filter((t) => t !== title); // Deselect the movie
-            } else {
-                return [...prevSelected, title]; // Select the new movie
-            }
-        });
-
-        // Update local storage
-        localStorage.setItem('selectedMovies', JSON.stringify([...selectedMovies, title]));
-
-        // Dispatch a custom event to update the Navigation item count
-        window.dispatchEvent(new Event('cartUpdated'));
+        setSelectedMovies((prevSelected) =>
+            prevSelected.includes(title)
+                ? prevSelected.filter((t) => t !== title)
+                : [...prevSelected, title]
+        );
     };
 
-    // Update total price including sales tax
     const updateTotalPrice = () => {
         const streamingPrice = selectedStreamingPlan ? selectedStreamingPlan.price : 0;
         const streamListPrice = selectedStreamListPlan ? selectedStreamListPlan.price : 0;
         const moviePrice = selectedMovies.reduce((total, movie) => {
             const movieData = favoriteMovies.find((m) => m.title === movie);
-            return total + (movieData ? 3.99 : 0); // Assume rental price is 3.99 if not provided
+            return total + (movieData ? 3.99 : 0);
         }, 0);
         const subtotal = streamingPrice + streamListPrice + moviePrice;
         const tax = subtotal * salesTaxRate;
@@ -118,24 +101,21 @@ export default function Cart() {
         setSalesTax(tax);
     };
 
-    // Update total price whenever selections change
     useEffect(() => {
         updateTotalPrice();
     }, [selectedStreamingPlan, selectedStreamListPlan, selectedMovies]);
 
-    // Handle form input for payment information
     const handlePaymentChange = (e) => {
         const { name, value } = e.target;
         setPaymentInfo({ ...paymentInfo, [name]: value });
     };
 
-    // Handle payment submission (stub for now)
     const handlePaymentSubmit = (e) => {
         e.preventDefault();
-        // Payment processing logic goes here
         console.log('Payment Information:', paymentInfo);
     };
 
+    
     return (
         <div id="cart">
             <div className="section">

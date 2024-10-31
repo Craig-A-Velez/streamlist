@@ -16,25 +16,23 @@ export default function Movies() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Check if movies data exists in local storage
         const savedMovies = localStorage.getItem('favoriteMovies');
-        if (savedMovies) {
-            setMovies(JSON.parse(savedMovies));  // Parse and set movies from local storage
-            setLoading(false);
-        } else {
-            // Fetch from API if no data is found in local storage
-            fetch('https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=1&sort_by=created_at.asc', options)
-                .then(res => res.json())
-                .then(data => {
-                    setMovies(data.results);  // Store the 'results' array in state
-                    localStorage.setItem('favoriteMovies', JSON.stringify(data.results));  // Save movies to local storage
-                    setLoading(false);
-                })
-                .catch(err => {
+
+        fetch('https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=1&sort_by=created_at.asc', options)
+            .then(res => res.json())
+            .then(data => {
+                setMovies(data.results);
+                localStorage.setItem('favoriteMovies', JSON.stringify(data.results));
+                setLoading(false);
+            })
+            .catch(err => {
+                if (savedMovies) {
+                    setMovies(JSON.parse(savedMovies));
+                } else {
                     setError(err);
-                    setLoading(false);
-                });
-        }
+                }
+                setLoading(false);
+            });
     }, []);
 
     if (loading) {
