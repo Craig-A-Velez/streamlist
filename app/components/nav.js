@@ -1,8 +1,9 @@
 'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import ezstreamLogo from '../components/images/ezstreamlogo.png';
+import ezstreamLogo from '/home/streamlist/streamlist/app/components/images/EZStreamLogo.png';
 
 export default function Navigation() {
     const [isMenuOpen, setMenuOpen] = useState(false);

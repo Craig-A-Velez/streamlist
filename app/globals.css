@@ -7,6 +7,11 @@ html, body {
     height: 100%;
 }
 
+main {
+    padding: 0 2rem;
+}
+
+
 body {
     display: flex;
     flex-direction: column;
@@ -109,6 +114,9 @@ nav a:hover .item-count {
 
 /* Media Query for smaller screens */
 @media (max-width: 768px) {
+    main {
+        padding: 0 0.5rem;
+    }
     .nav-links {
         display: none;
         flex-direction: column;
@@ -118,6 +126,7 @@ nav a:hover .item-count {
         background-color: #00394d;
         border-radius: 8px;
         padding: 1rem;
+        z-index: 200;
     }
 
     .nav-links.active {
@@ -135,9 +144,6 @@ nav a:hover .item-count {
 }
 /* End Media Query Block */
 
-main {
-    padding: 0 2rem;
-}
 
 #streamlist-form form {
     display: flex;
@@ -277,11 +283,11 @@ main {
         max-height: none;
     }
 
-        #cart .section {
-            flex-basis: unset;
-            max-width: none;
-            width: 100%;
-        }
+    #cart .section {
+        flex-basis: unset;
+        max-width: none;
+        width: 100%;
+    }
 
     .payment-details input {
         width: 100%;
@@ -301,20 +307,27 @@ main {
 }
 
 .card-holder {
-    width: 350px;
+    width: 300px;
     padding: 10px;
 }
 
 .movie-card {
     border: 1px solid slategray;
     border-radius: 5px;
+    position: relative;
 }
 
-    .movie-card .poster {
-        width: 100%;
-        height: 500px;
-        background-size: cover;
-    }
+.movie-card .poster {
+    width: 100%;
+    height: 440px;
+    background-size: cover;
+}
+ 
+.addCart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
 
 .info-card {
     padding: 0 10px;
