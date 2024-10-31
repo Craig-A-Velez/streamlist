@@ -78,7 +78,13 @@ nav .item-count {
 nav a:hover .item-count {
     border-color: red;
 }
-
+@media (min-width: 1060px) {
+    nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+}
 /* Hide menu on mobile */
 .hamburger {
     display: none;
@@ -228,6 +234,11 @@ nav a:hover .item-count {
     }
 }
 /* Payment Details */
+@media (max-width: 1060px) {
+    .section ul {
+        padding: 0;
+    }
+}
 #cart {
     padding: 20px 0;
     display: flex;
