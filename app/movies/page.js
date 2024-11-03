@@ -30,7 +30,7 @@ export default function Movies() {
         const savedMovies = localStorage.getItem('favoriteMovies');
         setLoading(true); // Start loading when fetching new data
 
-        fetch('https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=${currentPage}&sort_by=created_at.asc', options)
+        fetch(`https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=${currentPage}&sort_by=created_at.asc`, options)
             .then(res => res.json())
             .then(data => {
                 setMovies(data.results); // Save movies to state

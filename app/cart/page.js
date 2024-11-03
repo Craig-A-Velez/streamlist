@@ -49,9 +49,16 @@ export default function Cart() {
     useEffect(() => {
         if (typeof window !== "undefined") {
             const storedFavoriteMovies = localStorage.getItem('favoriteMovies');
-            setFavoriteMovies(storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : []);
+
+            try {
+                setFavoriteMovies(storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : []);
+            } catch (error) {
+                console.error("Failed to parse favorite movies from localStorage:", error);
+                setFavoriteMovies([]); // Set to an empty array if parsing fails
+            }
         }
     }, []);
+
 
     // Update the selected streaming plan based on user choice.
     const handleStreamingPlanSelect = (plan) => {
@@ -92,15 +99,26 @@ export default function Cart() {
         updateTotalPrice();
     }, [selectedStreamingPlan, selectedStreamListPlan, selectedMovies]);
 
-    // Update payment information fields as the user types.
     const handlePaymentChange = (e) => {
         const { name, value } = e.target;
-        setPaymentInfo({ ...paymentInfo, [name]: value });
+
+        if (name === 'cardNumber') {
+            const formattedValue = value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+            setPaymentInfo({ ...paymentInfo, [name]: formattedValue });
+        } else if (name === 'expiration') {
+            const formattedValue = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2').slice(0, 5);
+            setPaymentInfo({ ...paymentInfo, [name]: formattedValue });
+        } else if (name === 'cvv') {
+            const formattedValue = value.replace(/\D/g, '').slice(0, 3);
+            setPaymentInfo({ ...paymentInfo, [name]: formattedValue });
+        } else {
+            setPaymentInfo({ ...paymentInfo, [name]: value });
+        }
     };
 
-    // Log the payment information to the console when the payment form is submitted. Prevents default form submission.
     const handlePaymentSubmit = (e) => {
         e.preventDefault();
+        localStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
         console.log('Payment Information:', paymentInfo);
     };
 
@@ -210,12 +228,13 @@ export default function Cart() {
                 <h2>Payment</h2>
                 <form onSubmit={handlePaymentSubmit}>
                     <label>
-                        Name:
+                        Cardholder's Name:
                         <input
                             type="text"
                             name="name"
                             value={paymentInfo.name}
                             onChange={handlePaymentChange}
+                            placeholder="Cardholder's Name"
                         />
                     </label>
                     <label>
@@ -225,6 +244,8 @@ export default function Cart() {
                             name="cardNumber"
                             value={paymentInfo.cardNumber}
                             onChange={handlePaymentChange}
+                            placeholder="1234 5678 9012 3456"
+                            maxLength="19"
                         />
                     </label>
                     <label>
@@ -234,6 +255,8 @@ export default function Cart() {
                             name="expiration"
                             value={paymentInfo.expiration}
                             onChange={handlePaymentChange}
+                            placeholder="MM/YY"
+                            maxLength="5"
                         />
                     </label>
                     <label>
@@ -243,6 +266,8 @@ export default function Cart() {
                             name="cvv"
                             value={paymentInfo.cvv}
                             onChange={handlePaymentChange}
+                            placeholder="000"
+                            maxLength="3"
                         />
                     </label>
                     <button type="submit">Submit Payment</button>

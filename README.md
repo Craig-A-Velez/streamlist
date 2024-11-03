@@ -9,7 +9,7 @@ This project was built by Craig Velez for UAGC INT 499 Capstone for Information 
 To run this project the following packages are required.
 
 ```bash
-npm install next@latest react@latest react-dom@latest
+npm install next@latest next-auth react@latest react-dom@latest
 ```
 
 ## Running the Project

@@ -5,7 +5,10 @@ import Icons from './fonts/icons';
 import { CartProvider } from './components/custom/CartContext';
 import { useEffect } from 'react';
 import { Roboto } from 'next/font/google';
+import { SessionProvider } from 'next-auth/react';
 import Navigation from './components/nav';
+import ProtectedRoute from './components/custom/ProtectedRoute';
+
 
 // Configure Roboto font
 const roboto = Roboto({
@@ -16,7 +19,7 @@ const roboto = Roboto({
 
 
 
-export default function Layout({ children }) {
+export default function Layout({ children, session }) {
     useEffect(() => {
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').then(
@@ -33,15 +36,19 @@ export default function Layout({ children }) {
     return (
         <html lang="en" className={roboto.classname}>
             <body>
-                <CartProvider>
-                    <div className="content"><Icons />
-                            <Navigation />
-                            <main>{children}</main>
-                    </div>
-                    <footer className="footer">
-                        <a href="https://github.com/Craig-A-Velez/streamlist"><span>Craig Velez - 2024</span></a>
-                    </footer>
-                </CartProvider>
+                <SessionProvider session={session}>
+                    <ProtectedRoute>
+                        <CartProvider>
+                            <div className="content"><Icons />
+                                    <Navigation />
+                                    <main>{children}</main>
+                            </div>
+                            <footer className="footer">
+                                <a href="https://github.com/Craig-A-Velez/streamlist"><span>Craig Velez - 2024</span></a>
+                            </footer>
+                        </CartProvider>
+                    </ProtectedRoute>
+                </SessionProvider>
             </body>
             
         </html>
