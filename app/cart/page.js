@@ -1,11 +1,40 @@
-'use client';  // This directive is necessary for client-side functionality like useState
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { CartContext } from '/app/components/custom/CartContext';
 
 export default function Cart() {
-    const [selectedStreamingPlan, setSelectedStreamingPlan] = useState(null);
-    const [selectedStreamListPlan, setSelectedStreamListPlan] = useState(null);
-    const [selectedMovies, setSelectedMovies] = useState([]);
+    // Get selection states and setters from CartContext
+    const {
+        selectedMovies,
+        setSelectedMovies,
+        selectedStreamingPlan,
+        setSelectedStreamingPlan,
+        selectedStreamListPlan,
+        setSelectedStreamListPlan,
+    } = useContext(CartContext);
+
+    // Define options for Streaming Plans
+    const streamingPlans = [
+        { name: 'No Plan', detail: 'Remove Selected Plan.', price: 0.0 },
+        { name: 'Individual Plan', detail: 'Stream one movie to a single device at a time. This is the most common plan.', price: 9.99 },
+        { name: 'Friendly Plan', detail: 'Stream movies to up to two devices simultaneously in high definition (HD) if available.', price: 14.99 },
+        { name: 'Family Plan', detail: 'Stream movies to up to four devices simultaneously in ultra-high definition (UHD) if available.', price: 19.99 },
+    ];
+
+    // Define options for StreamList Plans
+    const streamListPlans = [
+        { name: 'No Subscription', detail: 'Remove Selected Plan.', price: 0.0 },
+        { name: 'Basic Subscription', detail: 'Maintain a single personal Watch List.', price: 4.99 },
+        { name: 'Gold Subscription', detail: 'Maintain 1 to 5 personal Watch Lists.', price: 9.99 },
+        { name: 'Premium Subscription', detail: 'Features multiple lists with built-in sharing capabilities among family members.', price: 14.99 },
+        { name: 'Social Media Sharing Subscription', detail: 'Merges premium access so you can share your movie lists on social media platforms, allowing other users to comment on and react to your lists.', price: 19.99 },
+    ];
+
+    // Sales Tax
+    const salesTaxRate = 0.0725;
+
+    // Local state for favorite movies, total price, sales tax, and payment information.
     const [favoriteMovies, setFavoriteMovies] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [salesTax, setSalesTax] = useState(0);
@@ -16,70 +45,26 @@ export default function Cart() {
         cvv: '',
     });
 
-    // Streaming plans with price info
-    const streamingPlans = [
-        { name: 'No Plan', detail: 'Remove Selected Plan.', price: 0.00 },
-        { name: 'Individual Plan', detail: 'Stream one movie to a single device at a time. This is the most common plan.', price: 9.99 },
-        { name: 'Friendly Plan', detail: 'Stream movies to up to two devices simultaneously in high definition (HD) if available.', price: 14.99 },
-        { name: 'Family Plan', detail: 'Stream movies to up to four devices simultaneously in ultra-high definition (UHD) if available.', price: 19.99 },
-    ];
-
-    // StreamList plans with price info
-    const streamListPlans = [
-        { name: 'No Subscription', detail: 'Remove Selected Plan.', price: 0.00 },
-        { name: 'Basic Subscription', detail: 'Maintain a single personal Watch List.', price: 4.99 },
-        { name: 'Gold Subscription', detail: 'Maintain 1 to 5 personal Watch Lists.', price: 9.99 },
-        { name: 'Premium Subscription', detail: 'Features multiple lists with built-in sharing capabilities among family members.', price: 14.99 },
-        { name: 'Social Media Sharing Subscription', detail: 'Merges premium access so you can share your movie lists on social media platforms, allowing other users to comment on and react to your lists.', price: 19.99 },
-    ];
-
-    const salesTaxRate = 0.0725;
-
-    // Load data from localStorage only on the client side
+    // On component mount, load favorite movies from localStorage, if available.
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const storedStreamingPlan = localStorage.getItem('selectedStreamingPlan');
-            const storedStreamListPlan = localStorage.getItem('selectedStreamListPlan');
-            const storedMovies = localStorage.getItem('selectedMovies');
             const storedFavoriteMovies = localStorage.getItem('favoriteMovies');
-
-            setSelectedStreamingPlan(storedStreamingPlan ? JSON.parse(storedStreamingPlan) : null);
-            setSelectedStreamListPlan(storedStreamListPlan ? JSON.parse(storedStreamListPlan) : null);
-            setSelectedMovies(storedMovies ? JSON.parse(storedMovies) : []);
             setFavoriteMovies(storedFavoriteMovies ? JSON.parse(storedFavoriteMovies) : []);
         }
     }, []);
 
-    // Save selections to localStorage whenever they change
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            localStorage.setItem('selectedStreamingPlan', JSON.stringify(selectedStreamingPlan));
-            window.dispatchEvent(new Event('cartUpdated'));
-        }
-    }, [selectedStreamingPlan]);
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            localStorage.setItem('selectedStreamListPlan', JSON.stringify(selectedStreamListPlan));
-            window.dispatchEvent(new Event('cartUpdated'));
-        }
-    }, [selectedStreamListPlan]);
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            localStorage.setItem('selectedMovies', JSON.stringify(selectedMovies));
-            window.dispatchEvent(new Event('cartUpdated'));
-        }
-    }, [selectedMovies]);
-
+    // Update the selected streaming plan based on user choice.
     const handleStreamingPlanSelect = (plan) => {
         setSelectedStreamingPlan(plan.name === 'No Plan' ? null : plan);
     };
 
+    // Update the selected StreamList plan based on user choice.
     const handleStreamListPlanSelect = (plan) => {
         setSelectedStreamListPlan(plan.name === 'No Subscription' ? null : plan);
     };
 
+    // Toggle movie selection based on its title. Adds the movie to selectedMovies
+    // if not present; otherwise, removes it. This keeps selectedMovies in sync with the UI.
     const handleMovieSelect = (title) => {
         setSelectedMovies((prevSelected) =>
             prevSelected.includes(title)
@@ -88,6 +73,7 @@ export default function Cart() {
         );
     };
 
+    // Calculate and update total price and sales tax based on current selections.
     const updateTotalPrice = () => {
         const streamingPrice = selectedStreamingPlan ? selectedStreamingPlan.price : 0;
         const streamListPrice = selectedStreamListPlan ? selectedStreamListPlan.price : 0;
@@ -101,21 +87,23 @@ export default function Cart() {
         setSalesTax(tax);
     };
 
+    // Recalculate total price whenever there is a change in the selection.
     useEffect(() => {
         updateTotalPrice();
     }, [selectedStreamingPlan, selectedStreamListPlan, selectedMovies]);
 
+    // Update payment information fields as the user types.
     const handlePaymentChange = (e) => {
         const { name, value } = e.target;
         setPaymentInfo({ ...paymentInfo, [name]: value });
     };
 
+    // Log the payment information to the console when the payment form is submitted. Prevents default form submission.
     const handlePaymentSubmit = (e) => {
         e.preventDefault();
         console.log('Payment Information:', paymentInfo);
     };
 
-    
     return (
         <div id="cart">
             <div className="section">
@@ -124,7 +112,6 @@ export default function Cart() {
                 <p>At EZTechMovie, we offer streaming plans designed to fit your lifestyle. Whether you're an individual streamer or part of a family of movie lovers, our plans deliver quality, convenience, and entertainment.</p>
             </div>
 
-            {/* Streaming Plans */}
             <div className="section">
                 <h2>Streaming Experience Plans</h2>
                 <ul>
@@ -144,9 +131,8 @@ export default function Cart() {
                 </ul>
             </div>
 
-            {/* StreamList Plans */}
             <div className="section">
-                <h2>StreamList Experience Plans (Minimum)</h2>
+                <h2>StreamList Experience Plans</h2>
                 <ul>
                     {streamListPlans.map((plan, index) => (
                         <li key={index}>
@@ -164,20 +150,19 @@ export default function Cart() {
                 </ul>
             </div>
 
-            {/* Available Movies */}
             <div className="section">
-                <h2>Available Movie Titles</h2>
+                <h2>Selected Movie Titles</h2>
                 <ul className="movie-titles">
-                    {favoriteMovies.length > 0 ? (
-                        favoriteMovies.map((movie, index) => (
+                    {selectedMovies.length > 0 ? (
+                        selectedMovies.map((movie, index) => (
                             <li key={index}>
                                 <label>
                                     <input
                                         type="checkbox"
-                                        checked={selectedMovies.includes(movie.title)}
-                                        onChange={() => handleMovieSelect(movie.title)}
+                                        checked={selectedMovies.includes(movie)}
+                                        onChange={() => handleMovieSelect(movie)}
                                     />
-                                    {movie.title} - $3.99
+                                    {movie} - $3.99
                                 </label>
                             </li>
                         ))
@@ -187,7 +172,6 @@ export default function Cart() {
                 </ul>
             </div>
 
-            {/* Cart Section */}
             <div className="section">
                 <h2>Your Cart</h2>
                 <ul>
@@ -203,7 +187,7 @@ export default function Cart() {
                     )}
                     {selectedMovies.length > 0 ? (
                         selectedMovies.map((movie, index) => (
-                            <li key={index}>{movie} - $3.99</li> // Assuming fixed price for now
+                            <li key={index}>{movie} - $3.99</li>
                         ))
                     ) : (
                         <li>No Movies Selected</li>
@@ -222,8 +206,6 @@ export default function Cart() {
                 </p>
             </div>
 
-
-            {/* Payment Form */}
             <div className="section payment-details">
                 <h2>Payment</h2>
                 <form onSubmit={handlePaymentSubmit}>

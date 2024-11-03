@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { CartContext } from '/app/components/custom/CartContext';
+import MoviesPager from '/app/components/custom/Movies';
+import Pagination from '/app/components/custom/Pagination';
 
 // Configuration options for API call
 const options = {
     method: 'GET',
     headers: {
         accept: 'application/json',
-        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZWFkMDhjZWI1NTEyNjBiZTIxNWRiNjZjYjhjMzhmZCIsIm5iZiI6MTcyOTgxMjg0MS4wMDMxNDIsInN1YiI6IjY3MWFkOGJlNGJlMTU0NjllNzBkOWQ1MiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.23_WM7hLCgTGuPIdKjvgWA0DT6GHd_Bd39j5hAfv4CM'
+        Authorization: process.env.NEXT_PUBLIC_API_BEARER_TOKEN, // Use environment variable
     }
 };
 
@@ -16,16 +19,22 @@ export default function Movies() {
     const [movies, setMovies] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedMovies, setSelectedMovies] = useState([]);
+    const [totalPages, setTotalPages] = useState(null);
+    const { selectedMovies, setSelectedMovies } = useContext(CartContext);
+
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Fetch favorite movies from API and store them in local storage
     useEffect(() => {
         const savedMovies = localStorage.getItem('favoriteMovies');
+        setLoading(true); // Start loading when fetching new data
 
-        fetch('https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=1&sort_by=created_at.asc', options)
+        fetch('https://api.themoviedb.org/3/account/21590425/favorite/movies?language=en-US&page=${currentPage}&sort_by=created_at.asc', options)
             .then(res => res.json())
             .then(data => {
                 setMovies(data.results); // Save movies to state
+                setTotalPages(data.total_pages);
                 localStorage.setItem('favoriteMovies', JSON.stringify(data.results)); // Cache in local storage
                 setLoading(false); // Set loading to false
             })
@@ -38,7 +47,7 @@ export default function Movies() {
                 }
                 setLoading(false); // Set loading to false
             });
-    }, []);
+    }, [currentPage]);
 
     // Load selected movies from local storage on component mount
     useEffect(() => {
@@ -58,14 +67,13 @@ export default function Movies() {
 
     // Function to add a movie to the selectedMovies array if it isn't already included
     const addToCart = (title) => {
-        setSelectedMovies((prevSelected) => {
-            // Only add movie if it's not already in the array
-            if (!prevSelected.includes(title)) {
-                return [...prevSelected, title];
-            }
-            return prevSelected;
-        });
+        if (!selectedMovies.includes(title)) {
+            setSelectedMovies([...selectedMovies, title]);
+        }
     };
+
+    // Pagination function to change the current page
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
     
     // Display loading indicator if still fetching data
     if (loading) {
@@ -81,25 +89,8 @@ export default function Movies() {
     return (
         <div id="movies-list">
             <h1>Favorite Movies</h1>
-            {movies && movies.length > 0 ? (
-                <div id="movie-list">
-                    {movies.map(movie => (
-                        <div className="card-holder" key={movie.id}>
-                            <div className="movie-card">
-                                <div className="poster" style={{ backgroundImage: `url(https://media.themoviedb.org/t/p/w300_and_h450_bestv2${movie.poster_path})` }}></div>
-                                <div className="info-card">
-                                    <h3>{movie.title}</h3>
-                                    <span>Release Date: {movie.release_date}</span>
-                                    <p>Overview: {movie.overview}</p>
-                                    <button className="addCart" onClick={() => addToCart(movie.title)}>Add to Cart</button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p>No favorite movies found.</p>
-            )}
+            <MoviesPager movies={movies} loading={loading} addToCart={addToCart} />
+            <Pagination totalPages={totalPages} paginate={paginate} />
         </div>
     );
 }
