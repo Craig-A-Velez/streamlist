@@ -1,13 +1,13 @@
 const CACHE_NAME = 'streamlist-cache-v1';
 
-//const urlsToCache = [
-//    '/',
-//    '/about',
-//    '/cart',
-//    '/streamlist',
-//    '/movies',
-//    '/manifest.json'
-//];
+const urlsToCache = [
+    '/',
+    '/about',
+    '/cart',
+    '/streamlist',
+    '/movies',
+    '/manifest.json'
+];
 
 // sw.js in the public directory
 self.addEventListener('install', (event) => {

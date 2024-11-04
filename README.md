@@ -17,6 +17,8 @@ npm install next@latest next-auth react@latest react-dom@latest
 Run the following command to initiate a production server of this Next project.
 
 ```bash
+npm run build
+# and
 npm start
 ```
 
