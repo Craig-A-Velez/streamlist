@@ -12,6 +12,16 @@ To run this project the following packages are required.
 npm install next@latest next-auth react@latest react-dom@latest
 ```
 
+Additionally this project utilizes environment variables located in a root .env file. Please ensure you have the following tokens saved in the .env file.
+
+```bash
+NEXT_PUBLIC_API_BEARER_TOKEN=[TMDB BEARER TOKEN]
+GOOGLE_CLIENT_ID=[GOOGLE OAUTH CLIENT ID]
+GOOGLE_CLIENT_SECRET=[GOOGLE OAUTH CLIENT SECRET]
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=[Generated NEXTAUTH SECRET]
+```
+
 ## Running the Project
 
 Run the following command to initiate a production server of this Next project.
